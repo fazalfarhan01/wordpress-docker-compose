@@ -2,7 +2,8 @@ version: '3'
 
 services:
   wp:
-    image: wordpress:latest # https://hub.docker.com/_/wordpress/
+    build: .
+    image: wordpress:redis # https://hub.docker.com/_/wordpress/
     ports:
       - ${WORDPRESS_PORT}:80 # change ip if required
     volumes:
@@ -36,7 +37,7 @@ services:
       - wp
 
   pma:
-    image: phpmyadmin/phpmyadmin
+    image: arm64v8/phpmyadmin
     environment:
       # https://docs.phpmyadmin.net/en/latest/setup.html#docker-environment-variables
       PMA_HOST: db
@@ -47,13 +48,13 @@ services:
     links:
       - db:db
   
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - ${ADMINER_PORT}:8080
-    environment: 
-      ADMINER_DESIGN: 'dracula'
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - ${ADMINER_PORT}:8080
+  #   environment: 
+  #     ADMINER_DESIGN: 'dracula'
 
   db:
     image: mariadb:latest # https://hub.docker.com/_/mysql/ - or mariadb https://hub.docker.com/_/mariadb
@@ -69,6 +70,11 @@ services:
       MYSQL_DATABASE: "${DB_NAME}"
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
     restart: always
+
+  redis:
+    container_name: redis
+    restart: unless-stopped
+    image: redis:alpine3.13
 
 volumes:
   db_data:
