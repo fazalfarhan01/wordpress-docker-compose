@@ -4,7 +4,7 @@ services:
   wp:
     image: wordpress:latest # https://hub.docker.com/_/wordpress/
     ports:
-      - ${IP}:80:80 # change ip if required
+      - ${WORDPRESS_PORT}:80 # change ip if required
     volumes:
       - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
       - ./wp-app:/var/www/html # Full wordpress project
@@ -19,6 +19,7 @@ services:
       - db
     links:
       - db
+    restart: always
 
   wpcli:
     image: wordpress:cli
@@ -42,14 +43,18 @@ services:
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
     ports:
-      - ${IP}:8080:80
+      - ${PHPMYADMIN_PORT}:80
     links:
       - db:db
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - ${ADMINER_PORT}:8080
 
   db:
-    image: mysql:latest # https://hub.docker.com/_/mysql/ - or mariadb https://hub.docker.com/_/mariadb
-    ports:
-      - ${IP}:3306:3306 # change ip if required
+    image: mariadb:latest # https://hub.docker.com/_/mysql/ - or mariadb https://hub.docker.com/_/mariadb
     command: [
         '--default_authentication_plugin=mysql_native_password',
         '--character-set-server=utf8mb4',
@@ -61,6 +66,7 @@ services:
     environment:
       MYSQL_DATABASE: "${DB_NAME}"
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+    restart: always
 
 volumes:
   db_data:
